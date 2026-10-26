@@ -197,6 +197,25 @@
   .candado{margin-top:10px;font-size:12px;color:var(--gris);text-align:center;line-height:1.45}
 
   /* ---------- pantalla bloqueada ---------- */
+  .importar-zona{border:2px dashed #cbbdf6;border-radius:14px;padding:22px;text-align:center;background:#faf9fe;cursor:pointer}
+  .importar-zona:hover{border-color:var(--morado)}
+  .importar-zona b{display:block;font-size:14.5px;margin-bottom:4px}
+  .importar-zona span{font-size:12.5px;color:var(--gris)}
+  .lista-errores{margin-top:10px;max-height:220px;overflow:auto;font-size:13px;line-height:1.5;padding-left:18px;color:var(--rojo)}
+  .resultado-ok{padding:12px 14px;border-radius:10px;background:var(--verde-suave);color:var(--verde);font-weight:600;font-size:13.5px;line-height:1.45}
+  .ventas-filtro{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .ventas-filtro input{padding:9px 12px;border:1px solid var(--gris-suave);border-radius:10px;font-size:14px}
+  .venta-item{border-top:1px solid var(--gris-suave);padding:12px 20px}
+  .venta-item summary{display:flex;gap:12px;align-items:center;cursor:pointer;list-style:none;flex-wrap:wrap}
+  .venta-item summary::-webkit-details-marker{display:none}
+  .venta-item .vid{font-family:'JetBrains Mono',monospace;color:var(--gris);font-size:12.5px;min-width:44px}
+  .venta-item .vh{font-weight:700;min-width:62px}
+  .venta-item .vv{flex:1;color:var(--gris);font-size:13.5px}
+  .venta-item .vt{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--morado-2)}
+  .venta-item table{margin-top:10px}
+  .por-vendedor{display:flex;gap:10px;flex-wrap:wrap;padding:14px 20px}
+  .por-vendedor div{background:#faf9fe;border:1px solid var(--gris-suave);border-radius:12px;padding:10px 14px;font-size:13px}
+  .por-vendedor b{display:block;font-size:15px;margin-top:2px;font-family:'JetBrains Mono',monospace;color:var(--morado-2)}
   .bloqueo{background:var(--blanco);border:1px dashed #cbbdf6;border-radius:var(--radio);padding:34px;text-align:center;box-shadow:var(--sombra)}
   .bloqueo .gran{font-size:42px}
   .bloqueo h3{font-size:19px;margin-top:10px}
@@ -372,16 +391,16 @@
   <button class="nav-item activo" data-pantalla="inventario"><span class="ic">📦</span> Inventario</button>
   <button class="nav-item" data-pantalla="categorias"><span class="ic">🏷️</span> Categorías</button>
   <button class="nav-item solo-admin" data-pantalla="usuarios"><span class="ic">👥</span> Usuarios</button>
-  <button class="nav-item" data-pantalla="venta"><span class="ic">🛒</span> Nueva venta <span class="etiqueta">Clase 4</span></button>
-  <button class="nav-item" data-pantalla="ventas"><span class="ic">🧾</span> Ventas del día <span class="etiqueta">Clase 4</span></button>
+  <button class="nav-item" data-pantalla="venta"><span class="ic">🛒</span> Nueva venta</button>
+  <button class="nav-item" data-pantalla="ventas"><span class="ic">🧾</span> Ventas del día</button>
 
   <div class="ruta">
     <h4>Lo que ya sabe hacer la API</h4>
     <ul>
       <li>✅ Clase 1 · Esqueleto por capas</li>
       <li>✅ Clase 2 · PostgreSQL + CRUD</li>
-      <li class="hoy">✅ Clase 3 · Login, JWT y roles</li>
-      <li class="pend">⏳ Clase 4 · Ventas</li>
+      <li>✅ Clase 3 · Login, JWT y roles</li>
+      <li class="hoy">✅ Clase 4 · Ventas, Excel y deploy</li>
     </ul>
   </div>
 
@@ -413,9 +432,12 @@
     <div class="encabezado">
       <div>
         <h2>Inventario</h2>
-        <p>Productos reales guardados en PostgreSQL. Todos los usuarios con sesión los ven; solo la administradora crea, edita y elimina.</p>
+        <p>Productos reales guardados en PostgreSQL. Todos los usuarios con sesión los ven; solo la administradora crea, edita, elimina y carga el Excel.</p>
       </div>
-      <button class="btn btn-primario solo-admin" id="btn-nuevo-producto">＋ Nuevo producto</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-suave solo-admin" id="btn-importar">📥 Importar Excel</button>
+        <button class="btn btn-primario solo-admin" id="btn-nuevo-producto">＋ Nuevo producto</button>
+      </div>
     </div>
 
     <div class="resumen">
@@ -512,7 +534,7 @@
     <div class="encabezado">
       <div>
         <h2>Nueva venta</h2>
-        <p>El catálogo es real y la API ya sabe quién está vendiendo. Lo que falta es el endpoint para registrar la venta.</p>
+        <p>Toca los productos para armar la venta. Al registrarla, el backend valida el stock, lo descuenta y calcula el total con los precios guardados.</p>
       </div>
     </div>
 
@@ -524,16 +546,16 @@
         <div class="ticket-total">
           <div class="fila"><span>Artículos</span><span id="ticket-items">0</span></div>
           <div class="fila grande"><span>Total</span><span id="ticket-total">$0</span></div>
-          <button class="btn btn-primario btn-cobrar" disabled>🔒 Registrar venta</button>
+          <button class="btn btn-primario btn-cobrar" id="btn-cobrar" disabled>💵 Registrar venta</button>
           <div class="vendedor-ticket">Vende: <b id="ticket-vendedor">—</b></div>
-          <div class="candado"><span class="mono">POST /ventas</span> llega en la Clase 4.<br>Ya sabemos <b>quién vende</b>: la venta guardará <span class="mono" id="ticket-vendedor-id">vendedor_id</span>.</div>
+          <div class="candado"><span class="mono">POST /ventas/</span> · el vendedor sale del token: <span class="mono" id="ticket-vendedor-id">vendedor_id</span>.<br>Este total es una <b>vista previa</b>; el oficial lo calcula el backend.</div>
         </div>
       </div>
     </div>
 
     <div class="aviso">
       <span>🧮</span>
-      <span>Este total lo calcula el navegador solo para mostrarlo. Cuando exista <code>POST /ventas</code>, el backend lo <b>recalculará</b> con los precios guardados: el total que manda el front nunca es la fuente de verdad.</span>
+      <span>El front solo envía <code>producto_id</code> y <code>cantidad</code>. Ni el total ni el vendedor viajan en el cuerpo: el backend los calcula y los toma del token. Si una línea no tiene stock, <b>no se guarda nada</b> (respuesta <code>409</code>).</span>
     </div>
   </section>
 
@@ -546,15 +568,29 @@
       </div>
     </div>
 
-    <div class="bloqueo">
-      <div class="gran">🔒</div>
-      <h3>Esta pantalla todavía no tiene backend</h3>
-      <p>Para responder "¿quién hizo cada venta?" la API necesita piezas que aún no existen. Así se ve el camino:</p>
-      <div class="requisitos">
-        <div class="req listo"><b>✅ Productos y stock</b><span>Tablas reales en PostgreSQL. Clase 2.</span></div>
-        <div class="req listo"><b>✅ Usuarios y login</b><span>Ya sabemos quién está vendiendo. Tabla <span class="mono">usuarios</span>, JWT y roles. Clase 3, hoy.</span></div>
-        <div class="req"><b>⏳ Venta y DetalleVenta</b><span>Guardar la venta, descontar stock y el vendedor. <span class="mono">GET /ventas</span>. Clase 4.</span></div>
+    <div class="resumen">
+      <div class="kpi"><div class="etq">Total vendido</div><div class="num" id="kv-total">—</div></div>
+      <div class="kpi"><div class="etq">Ventas</div><div class="num" id="kv-cantidad">—</div></div>
+      <div class="kpi"><div class="etq">Ticket promedio</div><div class="num" id="kv-promedio">—</div></div>
+      <div class="kpi"><div class="etq">Unidades vendidas</div><div class="num" id="kv-unidades">—</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-cab">
+        <h3 id="ventas-titulo">Ventas</h3>
+        <div class="ventas-filtro">
+          <input type="date" id="v-fecha">
+          <button class="btn btn-suave" id="btn-ventas-hoy" style="padding:9px 13px">Hoy</button>
+          <button class="btn btn-suave" id="btn-ventas-recargar" style="padding:9px 13px" title="Volver a pedir GET /ventas/">↻</button>
+        </div>
       </div>
+      <div class="por-vendedor solo-admin" id="ventas-por-vendedor"></div>
+      <div id="lista-ventas"><div class="vacio" style="padding:26px">Sin ventas cargadas.</div></div>
+    </div>
+
+    <div class="aviso">
+      <span>🧾</span>
+      <span><code>GET /ventas/?fecha=AAAA-MM-DD</code>. La administradora ve las ventas de todo el equipo; una vendedora ve <b>solo las suyas</b>. Ese filtro lo hace el backend con el usuario del token, no el front.</span>
     </div>
   </section>
 
@@ -593,6 +629,30 @@
       <button type="submit" class="btn btn-primario" id="mp-guardar">Guardar</button>
     </div>
   </form>
+</div>
+
+<!-- ===================== MODAL IMPORTAR EXCEL ===================== -->
+<div class="fondo-modal" id="modal-importar">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-cab">
+      <h3>📥 Importar inventario desde Excel</h3>
+      <span class="ruta-api">POST /productos/importar</span>
+    </div>
+    <div class="modal-cuerpo">
+      <label class="importar-zona" for="imp-archivo">
+        <b id="imp-nombre">Elige el archivo .xlsx de Doña Marta</b>
+        <span>Primera fila: Nombre · Precio · Stock · Categoría. Las categorías nuevas se crean solas.</span>
+      </label>
+      <input type="file" id="imp-archivo" accept=".xlsx" hidden>
+      <div class="error-api" id="imp-error"></div>
+      <ul class="lista-errores" id="imp-lista" hidden></ul>
+      <div class="resultado-ok" id="imp-ok" hidden></div>
+    </div>
+    <div class="modal-pie">
+      <button type="button" class="btn btn-suave" data-cerrar>Cerrar</button>
+      <button type="button" class="btn btn-primario" id="imp-subir" disabled>Subir y validar</button>
+    </div>
+  </div>
 </div>
 
 <!-- ===================== MODAL EDITAR CATEGORÍA ===================== -->
@@ -696,7 +756,12 @@
   /* =========================================================
      CONFIGURACIÓN
      ========================================================= */
-  const API = "https://la-cosecha-api-8c0g.onrender.com";
+  // Cambia esta URL por la de TU API cuando la publiques en Render.
+  const API_PRODUCCION = "https://la-cosecha-api.onrender.com";
+
+  const ES_LOCAL = ["127.0.0.1", "localhost", ""].includes(location.hostname);
+  const API = (new URLSearchParams(location.search).get("api") || (ES_LOCAL ? "http://127.0.0.1:8000" : API_PRODUCCION)).replace(/\/$/, "");
+  const ESPERA_CONEXION = ES_LOCAL ? 2500 : 75000;
   const STOCK_BAJO = 5;
 
   /* =========================================================
@@ -745,7 +810,8 @@
       case "greater_than": return `Debe ser mayor que ${c.gt}`;
       case "greater_than_equal": return `Debe ser mayor o igual a ${c.ge}`;
       case "literal_error": return `Solo se permite: ${c.expected}`;
-      case "value_error": return "No es un correo válido";
+      case "value_error": return (e.msg || "").startsWith("Value error, ") ? e.msg.slice(13) : "No es un correo válido";
+      case "too_short": return "Agrega al menos un producto";
       default: return e.msg;
     }
   }
@@ -836,13 +902,14 @@
       respuesta = apiSimulada(metodo, ruta, formulario ? formulario.toString() : cuerpo, token);
     } else {
       const headers = {};
+      const esArchivo = cuerpo instanceof FormData;
       if (token) headers["Authorization"] = "Bearer " + token;
-      if (cuerpo !== undefined) headers["Content-Type"] = "application/json";
+      if (cuerpo !== undefined && !esArchivo) headers["Content-Type"] = "application/json";
       try {
         const res = await fetch(API + ruta, {
           method: metodo,
           headers,
-          body: formulario ? formulario : (cuerpo !== undefined ? JSON.stringify(cuerpo) : undefined),
+          body: formulario ? formulario : (esArchivo ? cuerpo : (cuerpo !== undefined ? JSON.stringify(cuerpo) : undefined)),
         });
         const datos = res.status === 204 ? null : await res.json().catch(() => null);
         respuesta = { status: res.status, datos };
@@ -852,7 +919,7 @@
     }
     const visible = formulario
       ? formulario.toString().replace(/password=[^&]*/, "password=••••••")
-      : cuerpo;
+      : (cuerpo instanceof FormData ? "multipart/form-data · archivo: " + (cuerpo.get("archivo") || {}).name : cuerpo);
     registrar(metodo, ruta, visible, respuesta.status, respuesta.datos, Math.round(performance.now() - inicio));
     if (respuesta.status === 401 && ruta !== "/auth/login" && usuarioActual){
       cerrarSesion("Tu sesión venció o ya no es válida. Inicia sesión de nuevo.");
@@ -886,6 +953,8 @@
       { id: 2, nombre: "Laura Gómez", correo: "laura@lacosecha.com", rol: "vendedor", activo: true, clave: "Laura2026*" },
     ],
     sigUsuario: 3,
+    ventas: [],
+    sigVenta: 1,
   };
 
   const b64 = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
@@ -985,6 +1054,42 @@
       return r(404, { detail: "Not Found" });
     }
 
+    if (recurso === "ventas"){
+      if (metodo === "POST"){
+        const lineas = body && Array.isArray(body.detalles) ? body.detalles : [];
+        if (lineas.length === 0) return r(422, { detail: [{ type: "too_short", loc: ["body", "detalles"], msg: "List should have at least 1 item after validation, not 0" }] });
+        const ids = lineas.map(l => l.producto_id);
+        if (new Set(ids).size !== ids.length) return r(422, { detail: [{ type: "value_error", loc: ["body", "detalles"], msg: "Value error, Cada producto va una sola vez: suma las cantidades en una misma línea" }] });
+        for (const l of lineas){
+          const p = bd.productos.find(x => x.id === l.producto_id);
+          if (!p) return r(404, { detail: `El producto ${l.producto_id} no existe` });
+          if (p.stock < l.cantidad) return r(409, { detail: `No hay suficiente ${p.nombre}: quedan ${p.stock} y se pidieron ${l.cantidad}` });
+        }
+        let total = 0;
+        const detalles = lineas.map(l => {
+          const p = bd.productos.find(x => x.id === l.producto_id);
+          p.stock -= l.cantidad;
+          const subtotal = p.precio * l.cantidad;
+          total += subtotal;
+          return { producto_id: p.id, producto_nombre: p.nombre, cantidad: l.cantidad, precio_unitario: p.precio, subtotal };
+        });
+        const venta = { id: bd.sigVenta++, fecha: new Date().toISOString(), total, vendedor_id: actual.id, vendedor_nombre: actual.nombre, detalles };
+        bd.ventas.push(venta);
+        return r(201, venta);
+      }
+      if (metodo === "GET"){
+        const dia = new URLSearchParams(ruta.split("?")[1] || "").get("fecha") || hoyISO();
+        return r(200, bd.ventas
+          .filter(v => fechaLocalISO(new Date(v.fecha)) === dia && (actual.rol === "admin" || v.vendedor_id === actual.id))
+          .sort((a, b) => b.id - a.id));
+      }
+    }
+
+    if (recurso === "productos" && partes[1] === "importar"){
+      if (actual.rol !== "admin") return prohibido;
+      return r(503, { detail: "En modo demostración no se procesan archivos de Excel: conecta la API real para importar" });
+    }
+
     if ((recurso === "categorias" || recurso === "productos") && escribe && actual.rol !== "admin") return prohibido;
 
     if (recurso === "categorias"){
@@ -1040,6 +1145,7 @@
       }
       if (metodo === "DELETE"){
         if (!prod) return noProd;
+        if (bd.ventas.some(v => v.detalles.some(d => d.producto_id === id))) return r(409, { detail: "No se puede eliminar un producto que ya tiene ventas" });
         bd.productos = bd.productos.filter(p => p.id !== id);
         return r(204, null);
       }
@@ -1090,7 +1196,7 @@
     if (nuevo === "api"){
       caja.classList.add("api");
       $("con-titulo").textContent = "API conectada";
-      $("con-detalle").textContent = API.replace("http://", "");
+      $("con-detalle").textContent = API.replace(/^https?:\/\//, "");
       aviso.hidden = true;
     } else {
       caja.classList.add("demo");
@@ -1099,9 +1205,12 @@
       aviso.hidden = false;
       aviso.className = "aviso demo";
       aviso.innerHTML = `<span>⚠️</span><span><b>No hay conexión con la API.</b> Estás viendo datos simulados que siguen las mismas reglas del backend.
-        Para conectar: (1) arranca el backend con <code>fastapi dev app/main.py</code>;
-        (2) abre esta página con un servidor en el puerto 5500, por ejemplo <code>py -m http.server 5500</code> desde la carpeta de este archivo, y entra a <code>http://127.0.0.1:5500/front-la-cosecha.html</code>;
-        (3) el backend debe permitir ese origen con <b>CORS</b>. Luego pulsa ↻. En modo demostración entra como <b>Marta</b> (admin) o <b>Laura</b> (vendedora) con los botones del inicio de sesión.</span>`;
+        ${ES_LOCAL
+          ? `Para conectar: (1) arranca el backend con <code>fastapi dev app/main.py</code>;
+        (2) abre esta página con un servidor en el puerto 5500, por ejemplo <code>py -m http.server 5500</code> desde la carpeta <code>front</code>, y entra a <code>http://127.0.0.1:5500/</code>;
+        (3) el backend debe permitir ese origen con <b>CORS</b>.`
+          : `La API publicada es <code>${esc(API)}</code>. Revisa que el servicio en Render esté desplegado y que su variable <code>CORS_ORIGINS</code> incluya <code>${esc(location.origin)}</code>.`}
+        Luego pulsa ↻. En modo demostración entra como <b>Marta</b> (admin) o <b>Laura</b> (vendedora) con los botones del inicio de sesión.</span>`;
     }
   }
 
@@ -1109,8 +1218,9 @@
     modo = "conectando";
     $("conexion").classList.remove("api", "demo");
     $("con-titulo").textContent = "Conectando…";
+    $("con-detalle").textContent = ES_LOCAL ? API.replace(/^https?:\/\//, "") : "Si la API estaba dormida, Render tarda cerca de 1 minuto en despertarla";
     const controlador = new AbortController();
-    const espera = setTimeout(() => controlador.abort(), 2000);
+    const espera = setTimeout(() => controlador.abort(), ESPERA_CONEXION);
     const inicio = performance.now();
     try {
       const res = await fetch(API + "/", { signal: controlador.signal });
@@ -1174,7 +1284,7 @@
   function cerrarSesion(mensaje = ""){
     guardarToken(null);
     usuarioActual = null;
-    productos = []; categorias = []; usuarios = []; ticket = {};
+    productos = []; categorias = []; usuarios = []; ticket = {}; ventas = [];
     document.body.classList.remove("con-sesion", "es-vendedor", "es-admin", "modo-prueba");
     $("chk-prueba").checked = false;
     cerrarModales();
@@ -1241,6 +1351,7 @@
   function irA(pantalla){
     navItems.forEach(x => x.classList.toggle("activo", x.dataset.pantalla === pantalla));
     document.querySelectorAll(".pantalla").forEach(p => p.classList.toggle("visible", p.id === pantalla));
+    if (pantalla === "ventas" && usuarioActual) cargarVentas();
   }
   navItems.forEach(b => b.addEventListener("click", () => irA(b.dataset.pantalla)));
 
@@ -1572,6 +1683,7 @@
       cuerpo.innerHTML = '<div class="ticket-vacio">Toca un producto para empezar</div>';
       $("ticket-items").textContent = "0";
       $("ticket-total").textContent = "$0";
+      $("btn-cobrar").disabled = true;
       return;
     }
     let total = 0, items = 0;
@@ -1587,7 +1699,135 @@
     }).join("");
     $("ticket-items").textContent = items;
     $("ticket-total").textContent = peso(total);
+    $("btn-cobrar").disabled = false;
   }
+
+  /* ---------- registrar la venta en el backend ---------- */
+  $("btn-cobrar").addEventListener("click", async () => {
+    const detalles = Object.entries(ticket).map(([id, cantidad]) => ({ producto_id: Number(id), cantidad }));
+    if (detalles.length === 0) return;
+    const previa = detalles.reduce((s, d) => s + productos.find(p => p.id === d.producto_id).precio * d.cantidad, 0);
+    $("btn-cobrar").disabled = true;
+    const res = await pedir("POST", "/ventas/", { detalles });
+    if (res.status === 201){
+      ticket = {};
+      const coincide = res.datos.total === previa ? "coincide con la vista previa" : `la vista previa decía ${peso(previa)}: el precio cambió en el servidor`;
+      avisar(`Venta #${res.datos.id} registrada · ${peso(res.datos.total)} (${coincide})`);
+      await cargarTodo();
+    } else {
+      $("btn-cobrar").disabled = false;
+      const { general, campos } = leerError(res);
+      avisar(`${res.status || "Sin conexión"} · ${campos.detalles || general}`, true);
+      if (res.status === 409 || res.status === 404) await cargarTodo();
+    }
+  });
+
+  /* =========================================================
+     VENTAS DEL DÍA
+     ========================================================= */
+  let ventas = [];
+  const dosDigitos = n => String(n).padStart(2, "0");
+  const fechaLocalISO = d => `${d.getFullYear()}-${dosDigitos(d.getMonth() + 1)}-${dosDigitos(d.getDate())}`;
+  const hoyISO = () => fechaLocalISO(new Date());
+  $("v-fecha").value = hoyISO();
+
+  async function cargarVentas(){
+    const fecha = $("v-fecha").value || hoyISO();
+    const res = await pedir("GET", `/ventas/?fecha=${fecha}`);
+    ventas = res.status === 200 ? res.datos : [];
+    pintarVentas();
+  }
+
+  function pintarVentas(){
+    const esAdmin = usuarioActual && usuarioActual.rol === "admin";
+    const total = ventas.reduce((s, v) => s + v.total, 0);
+    const unidades = ventas.reduce((s, v) => s + v.detalles.reduce((t, d) => t + d.cantidad, 0), 0);
+    $("kv-total").textContent = peso(total);
+    $("kv-cantidad").textContent = ventas.length;
+    $("kv-promedio").textContent = ventas.length ? peso(Math.round(total / ventas.length)) : "—";
+    $("kv-unidades").textContent = unidades;
+    $("ventas-titulo").textContent = esAdmin ? "Ventas de todo el equipo" : "Mis ventas";
+
+    const porVendedor = {};
+    ventas.forEach(v => { porVendedor[v.vendedor_nombre] = (porVendedor[v.vendedor_nombre] || 0) + v.total; });
+    $("ventas-por-vendedor").innerHTML = Object.entries(porVendedor)
+      .map(([n, t]) => `<div>${esc(n)}<b>${peso(t)}</b></div>`).join("");
+
+    const lista = $("lista-ventas");
+    if (ventas.length === 0){
+      lista.innerHTML = '<div class="vacio" style="padding:26px">No hay ventas registradas ese día.</div>';
+      return;
+    }
+    lista.innerHTML = ventas.map(v => {
+      const hora = new Date(v.fecha).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+      const items = v.detalles.reduce((t, d) => t + d.cantidad, 0);
+      return `<details class="venta-item">
+        <summary>
+          <span class="vid">#${v.id}</span>
+          <span class="vh">${hora}</span>
+          <span class="vv">${esc(v.vendedor_nombre)} · ${items} artículo${items === 1 ? "" : "s"}</span>
+          <span class="vt">${peso(v.total)}</span>
+        </summary>
+        <table>
+          <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+          <tbody>${v.detalles.map(d => `<tr>
+            <td class="prod">${esc(d.producto_nombre)}</td><td>${d.cantidad}</td>
+            <td class="precio">${peso(d.precio_unitario)}</td><td class="precio">${peso(d.subtotal)}</td></tr>`).join("")}</tbody>
+        </table>
+      </details>`;
+    }).join("");
+  }
+
+  $("v-fecha").addEventListener("change", cargarVentas);
+  $("btn-ventas-recargar").addEventListener("click", cargarVentas);
+  $("btn-ventas-hoy").addEventListener("click", () => { $("v-fecha").value = hoyISO(); cargarVentas(); });
+
+  /* =========================================================
+     IMPORTAR EXCEL (solo admin)
+     ========================================================= */
+  function abrirImportar(){
+    $("imp-archivo").value = "";
+    $("imp-nombre").textContent = "Elige el archivo .xlsx de Doña Marta";
+    $("imp-subir").disabled = true;
+    $("imp-error").classList.remove("ver");
+    $("imp-lista").hidden = true;
+    $("imp-ok").hidden = true;
+    $("modal-importar").classList.add("ver");
+  }
+  $("btn-importar").addEventListener("click", abrirImportar);
+  $("imp-archivo").addEventListener("change", () => {
+    const archivo = $("imp-archivo").files[0];
+    $("imp-nombre").textContent = archivo ? "📄 " + archivo.name : "Elige el archivo .xlsx de Doña Marta";
+    $("imp-subir").disabled = !archivo;
+  });
+  $("imp-subir").addEventListener("click", async () => {
+    const archivo = $("imp-archivo").files[0];
+    if (!archivo) return;
+    const datos = new FormData();
+    datos.append("archivo", archivo);
+    $("imp-subir").disabled = true;
+    $("imp-error").classList.remove("ver");
+    $("imp-lista").hidden = true;
+    $("imp-ok").hidden = true;
+    const res = await pedir("POST", "/productos/importar", datos);
+    if (res.status === 201){
+      const nuevas = res.datos.categorias_creadas;
+      $("imp-ok").innerHTML = `✓ Se importaron <b>${res.datos.productos_creados}</b> productos.` +
+        (nuevas.length ? `<br>Categorías nuevas: ${nuevas.map(esc).join(", ")}.` : "");
+      $("imp-ok").hidden = false;
+      await cargarTodo();
+    } else {
+      const { general } = leerError(res);
+      $("imp-error").innerHTML = `<span class="codigo ${claseCodigo(res.status)}">${res.status || "—"}</span><span>${esc(general)}</span>`;
+      $("imp-error").classList.add("ver");
+      const errores = (res.datos && res.datos.errores) || [];
+      if (errores.length){
+        $("imp-lista").innerHTML = errores.map(e => `<li>${esc(e)}</li>`).join("");
+        $("imp-lista").hidden = false;
+      }
+      $("imp-subir").disabled = false;
+    }
+  });
 
   /* =========================================================
      ARRANQUE
